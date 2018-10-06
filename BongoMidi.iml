@@ -7,7 +7,5 @@
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
-    <orderEntry type="library" name="commons-lang:commons-lang:2.6" level="project" />
-    <orderEntry type="library" name="de.gurkenlabs:litiengine:0.4.13" level="project" />
   </component>
 </module>

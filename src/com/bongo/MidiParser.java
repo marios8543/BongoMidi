@@ -26,7 +26,6 @@ public class MidiParser {
         Map<Integer,Integer> v_instrs = new HashMap<Integer, Integer>();
         ArrayList<Integer> v_ons = new ArrayList<Integer>();
         ArrayList<Integer> v_offs = new ArrayList<Integer>();
-        ArrayList<Instrument> instruments = new ArrayList<Instrument>();
         public creceiver(){
             for(Integer i=192;i<=207;i++){
                 v_instrs.put(i,0);
