@@ -37,10 +37,10 @@ public abstract class Renderer {
             return String.format("X:%d - Y:%d - L:%b R:%b - %s",this.x,this.y,this.l_hand,this.r_hand,this.note.toString());
         }
     }
-
+    static ClassLoader classLoader = Renderer.class.getClassLoader();
     public static Image load_asset(String asset){
         try{
-            return ImageIO.read(new File(System.getProperty("user.dir")+"/assets/"+asset)).getScaledInstance(366,250,Image.SCALE_FAST);
+            return ImageIO.read(classLoader.getResource(asset)).getScaledInstance(366,250,Image.SCALE_FAST);
         }
         catch (Exception e){
             return null;
