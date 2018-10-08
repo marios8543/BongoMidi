@@ -1,10 +1,34 @@
 package com.bongo;
 import java.awt.*;
-import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Random;
 import javax.imageio.ImageIO;
 
 public abstract class Renderer {
+    private static ArrayList<Integer> xcoords = new ArrayList<Integer>();
+    private static ArrayList<Integer> ycoords = new ArrayList<Integer>();
+    private static ArrayList<Integer[]> coords = new ArrayList<Integer[]>();
+    private static Random rand = new Random();
+
+    public static void build_coords(){
+        for(Integer i=0;i<1024;i++){
+            xcoords.add(i);
+            i+=300;
+        }
+        for(Integer i=0;i<720;i++){
+            ycoords.add(i);
+            i+=184;
+        }
+        for(int a : xcoords){
+            for(int b :ycoords){
+                coords.add(new Integer[]{a,b});
+            }
+        }
+    }
+
     public static class Bongo {
         public Integer x;
         public Integer y;
@@ -19,16 +43,27 @@ public abstract class Renderer {
                 this.y = Main.bongos[note.channel].y;
             }
             else {
-                this.x = rand.nextInt(659);
-                this.y = rand.nextInt(471);
+                Integer[] c = coords.get(15-note.channel);
+                this.x = c[0];
+                this.y = c[1];
             }
             this.note = note;
             if(note.status){
-                if(note.midi_number<60){
-                    this.l_hand=true;
+                if(note.cpatch==Instr_Categ.Percussion || note.cpatch==Instr_Categ.CPerc){
+                    if(note.midi_number<=36){
+                        this.l_hand=true;
+                    }
+                    else {
+                        this.r_hand=true;
+                    }
                 }
-                else{
-                    this.r_hand=true;
+                else {
+                    if(note.midi_number<60){
+                        this.l_hand=true;
+                    }
+                    else{
+                        this.r_hand=true;
+                    }
                 }
             }
         }
@@ -37,10 +72,15 @@ public abstract class Renderer {
             return String.format("X:%d - Y:%d - L:%b R:%b - %s",this.x,this.y,this.l_hand,this.r_hand,this.note.toString());
         }
     }
+
+    private enum coords{
+
+    }
+
     static ClassLoader classLoader = Renderer.class.getClassLoader();
     public static Image load_asset(String asset){
         try{
-            return ImageIO.read(classLoader.getResource(asset)).getScaledInstance(366,250,Image.SCALE_FAST);
+            return ImageIO.read(classLoader.getResource(asset)).getScaledInstance(380,264,Image.SCALE_FAST);
         }
         catch (Exception e){
             return null;

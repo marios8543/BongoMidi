@@ -26,6 +26,7 @@ class Main {
     static ExecutorService executor = Executors.newFixedThreadPool(10);
 
     public static void main(String[] args) throws Exception {
+        Renderer.build_coords();
         JFileChooser chooser = new JFileChooser();
         FileNameExtensionFilter filter = new FileNameExtensionFilter("MIDI Files", "mid", "midi");
         chooser.setFileFilter(filter);
@@ -35,7 +36,7 @@ class Main {
         }
         MidiParser parser = new MidiParser(file);
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        window.setBounds(30, 30, 1024, 720);
+        window.setBounds(30, 30, 1350, 800);
         window.setName("Bongo Cat MIDI Player");
         window.setVisible(true);
         window.getContentPane().add(new MyCanvas());
@@ -43,6 +44,8 @@ class Main {
             @Override
             public void run() {
                 while (true){
+                    window.invalidate();
+                    window.validate();
                     window.repaint();
                 }
             }
