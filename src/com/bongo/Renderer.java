@@ -37,17 +37,6 @@ public abstract class Renderer {
         public Boolean r_hand=false;
 
         public Bongo(Note note) {
-            Random rand = new Random();
-            if(Main.bongos[note.channel]!=null){
-                this.x = Main.bongos[note.channel].x;
-                this.y = Main.bongos[note.channel].y;
-            }
-            else {
-                Integer[] c = coords.get(15-note.channel);
-                this.x = c[0];
-                this.y = c[1];
-            }
-            this.note = note;
             if(note.status){
                 if(note.cpatch==Instr_Categ.Percussion || note.cpatch==Instr_Categ.CPerc){
                     if(note.midi_number<=36){
@@ -66,6 +55,19 @@ public abstract class Renderer {
                     }
                 }
             }
+            if(Main.bongos[note.channel]!=null){
+                this.x = Main.bongos[note.channel].x;
+                this.y = Main.bongos[note.channel].y;
+                this.l_hand = !Main.bongos[note.channel].l_hand;
+                this.r_hand = !Main.bongos[note.channel].r_hand;
+            }
+            else {
+                Integer[] c = coords.get(15-note.channel);
+                this.x = c[0];
+                this.y = c[1];
+            }
+            this.note = note;
+
         }
         @Override
         public String toString(){

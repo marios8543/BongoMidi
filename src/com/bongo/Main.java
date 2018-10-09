@@ -44,8 +44,6 @@ class Main {
             @Override
             public void run() {
                 while (true){
-                    window.invalidate();
-                    window.validate();
                     window.repaint();
                 }
             }
