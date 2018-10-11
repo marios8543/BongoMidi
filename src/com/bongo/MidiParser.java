@@ -23,9 +23,9 @@ public class MidiParser {
 
 
     public static class creceiver implements Receiver {
-        Map<Integer,Integer> v_instrs = new HashMap<Integer, Integer>();
-        ArrayList<Integer> v_ons = new ArrayList<Integer>();
-        ArrayList<Integer> v_offs = new ArrayList<Integer>();
+        Map<Integer,Integer> v_instrs = new HashMap<>();
+        ArrayList<Integer> v_ons = new ArrayList<>();
+        ArrayList<Integer> v_offs = new ArrayList<>();
         public creceiver(){
             for(Integer i=192;i<=207;i++){
                 v_instrs.put(i,0);
