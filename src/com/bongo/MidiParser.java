@@ -7,17 +7,15 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
-public class MidiParser {
+class MidiParser {
     Sequencer sequencer;
-    Sequence seq;
-    Transmitter transmitter;
 
-    public MidiParser(File file) throws Exception{
+    MidiParser(File file) throws Exception{
         sequencer = MidiSystem.getSequencer();
-        seq = MidiSystem.getSequence(file);
+        Sequence seq = MidiSystem.getSequence(file);
         sequencer.setSequence(seq);
         sequencer.open();
-        transmitter = sequencer.getTransmitter();
+        Transmitter transmitter = sequencer.getTransmitter();
         transmitter.setReceiver(new creceiver());
     }
 
@@ -26,16 +24,19 @@ public class MidiParser {
         Map<Integer,Integer> v_instrs = new HashMap<>();
         ArrayList<Integer> v_ons = new ArrayList<>();
         ArrayList<Integer> v_offs = new ArrayList<>();
-        public creceiver(){
-            for(Integer i=192;i<=207;i++){
+
+        creceiver(){
+            for(int i=192;i<=207;i++){
                 v_instrs.put(i,0);
             }
-            for(Integer i=0;i<16;i++){
+            for(int i=0;i<16;i++){
                 v_ons.add(i+144);
                 v_offs.add(i+128);
             }
         }
+
         Note note;
+
         @Override
         public void send(MidiMessage message, long timeStamp){
             note = process_message(message);
@@ -43,10 +44,10 @@ public class MidiParser {
                 Main.bongos[note.channel] = new Renderer.Bongo(note);
             }
         }
+
         public void close(){}
 
-
-        public Note process_message(MidiMessage message){
+        Note process_message(MidiMessage message){
             if(v_instrs.containsKey(message.getStatus())){
                 Byte patch = message.getMessage()[1];
                 v_instrs.put(message.getStatus(),patch.intValue());

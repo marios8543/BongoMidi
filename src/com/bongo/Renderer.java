@@ -1,26 +1,20 @@
 package com.bongo;
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.Random;
 import javax.imageio.ImageIO;
 
-public abstract class Renderer {
-    private static ArrayList<Integer> xcoords = new ArrayList<Integer>();
-    private static ArrayList<Integer> ycoords = new ArrayList<Integer>();
-    private static ArrayList<Integer[]> coords = new ArrayList<Integer[]>();
-    private static Random rand = new Random();
+abstract class Renderer {
+    private static ArrayList<Integer> xcoords = new ArrayList<>();
+    private static ArrayList<Integer> ycoords = new ArrayList<>();
+    private static ArrayList<Integer[]> coords = new ArrayList<>();
 
-    public static void build_coords(){
-        for(Integer i=0;i<1024;i++){
+    static void build_coords(){
+        for(Integer i=0;i<1024;i+=301){
             xcoords.add(i);
-            i+=300;
         }
-        for(Integer i=0;i<720;i++){
+        for(Integer i=0;i<720;i+=185){
             ycoords.add(i);
-            i+=184;
         }
         for(int a : xcoords){
             for(int b :ycoords){
@@ -30,13 +24,13 @@ public abstract class Renderer {
     }
 
     public static class Bongo {
-        public Integer x;
-        public Integer y;
-        public Note note;
-        public Boolean l_hand=false;
-        public Boolean r_hand=false;
+        Integer x;
+        Integer y;
+        Note note;
+        Boolean l_hand=false;
+        Boolean r_hand=false;
 
-        public Bongo(Note note) {
+        Bongo(Note note) {
             if(note.status){
                 if(note.cpatch==Instr_Categ.Percussion || note.cpatch==Instr_Categ.CPerc){
                     if(note.midi_number<=36){
@@ -75,12 +69,9 @@ public abstract class Renderer {
         }
     }
 
-    private enum coords{
+    private static ClassLoader classLoader = Renderer.class.getClassLoader();
 
-    }
-
-    static ClassLoader classLoader = Renderer.class.getClassLoader();
-    public static Image load_asset(String asset){
+    private static Image load_asset(String asset){
         try{
             return ImageIO.read(classLoader.getResource(asset)).getScaledInstance(380,264,Image.SCALE_FAST);
         }
@@ -127,17 +118,15 @@ public abstract class Renderer {
             return hand;
         }
     }
-    public static Image get_lhand(Boolean state) {
+    static Image get_lhand(Boolean state) {
         if (!state) {
             return hands.lh1.get_hand();
         }
         return hands.lh2.get_hand();
     }
 
-    public static Image get_rhand(Boolean state) {
-        if(state == false){
-            return hands.rh1.get_hand();
-        }
+    static Image get_rhand(Boolean state) {
+        if(!state) return hands.rh1.get_hand();
         return hands.rh2.get_hand();
     }
 }

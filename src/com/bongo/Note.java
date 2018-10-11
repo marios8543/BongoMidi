@@ -2,13 +2,13 @@ package com.bongo;
 
 public class Note {
 
-    public Integer midi_number;
-    public Integer channel;
-    public Integer patch;
-    public Renderer.Instr_Categ cpatch;
-    public Boolean status;
+    Integer midi_number;
+    Integer channel;
+    Integer patch;
+    Renderer.Instr_Categ cpatch;
+    Boolean status;
 
-    public Note(Integer channel, Integer midi_number, Integer instrument, Boolean status){
+    Note(Integer channel, Integer midi_number, Integer instrument, Boolean status){
         this.patch = instrument;
         this.channel = channel;
         if(channel==9) {

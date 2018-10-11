@@ -21,14 +21,13 @@ class MyCanvas extends JComponent {
 }
 class Main{
 
-    public static Renderer.Bongo[] bongos = new Renderer.Bongo[16];
-    public static JFrame window = new JFrame();
-    public static Thread renderThread;
-    public static boolean playing = true;
-    public static MidiParser parser;
-    public static JButton pauseButton;
+    static Renderer.Bongo[] bongos = new Renderer.Bongo[16];
+    static JFrame window = new JFrame();
+    private static boolean playing = true;
+    private static MidiParser parser;
+    private static JButton pauseButton;
 
-    public static void togglePlayPause() {
+    private static void togglePlayPause() {
         if (playing) {
             parser.sequencer.stop();
             pauseButton.setText("PLAY");
@@ -78,7 +77,7 @@ class Main{
         window.getContentPane().setBackground(Color.WHITE);
         window.getContentPane().add(Box.createRigidArea(new Dimension(0,5))); // bottom padding
         window.setVisible(true);
-        renderThread = new Thread(() -> {
+        Thread renderThread = new Thread(() -> {
             GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
             GraphicsDevice d = ge.getDefaultScreenDevice();
             int refreshRate = (d.getDisplayMode().getRefreshRate() == DisplayMode.REFRESH_RATE_UNKNOWN) ?
@@ -89,6 +88,7 @@ class Main{
                     Thread.sleep(ms);
                 } catch (Exception e) {
                     JOptionPane.showMessageDialog(window, "Renderer thread interrupted", "Error", JOptionPane.ERROR_MESSAGE);
+                    break;
                 }
                 if (!playing) continue;
                 window.repaint();
