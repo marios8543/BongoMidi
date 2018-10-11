@@ -143,25 +143,7 @@ class Main{
         window.getContentPane().setBackground(Color.WHITE);
         window.getContentPane().add(Box.createRigidArea(new Dimension(0,5))); // bottom padding
         window.setVisible(true);
-        Thread renderThread = new Thread(() -> {
-            GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
-            GraphicsDevice d = ge.getDefaultScreenDevice();
-            int refreshRate = (d.getDisplayMode().getRefreshRate() == DisplayMode.REFRESH_RATE_UNKNOWN) ?
-                    60 : d.getDisplayMode().getRefreshRate();
-            long ms = (long) ((1. / ((double) refreshRate)) * 1000);
-            while (true){
-                try {
-                    Thread.sleep(ms);
-                } catch (Exception e) {
-                    JOptionPane.showMessageDialog(window, "Renderer thread interrupted", "Error", JOptionPane.ERROR_MESSAGE);
-                    break;
-                }
-                if (!playing) continue;
-                window.repaint();
-            }
-        });
         timeThread = generateTimeThread();
-        renderThread.start();
         timeThread.start();
         parser.sequencer.start();
     }
