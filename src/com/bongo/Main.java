@@ -1,15 +1,15 @@
 package com.bongo;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyEvent;
 import java.io.File;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 class MyCanvas extends JComponent {
     public void paintComponent(Graphics g){
-        Graphics2D g2 = (Graphics2D) g;
-        for(Integer i=0;i<Main.bongos.length;i++){
+        g.clearRect(0, 0, Main.window.getWidth(), Main.window.getHeight());
+        for(int i=0;i<Main.bongos.length;i++){
             Renderer.Bongo bongo = Main.bongos[i];
             if(bongo!=null){
                 g.drawImage(bongo.note.cpatch.getAsset(),bongo.x,bongo.y,this);
@@ -19,11 +19,25 @@ class MyCanvas extends JComponent {
         }
     }
 }
-class Main {
+class Main{
 
     public static Renderer.Bongo[] bongos = new Renderer.Bongo[16];
     public static JFrame window = new JFrame();
-    static ExecutorService executor = Executors.newFixedThreadPool(10);
+    public static Thread renderThread;
+    public static boolean playing = true;
+    public static MidiParser parser;
+    public static JButton pauseButton;
+
+    public static void togglePlayPause() {
+        if (playing) {
+            parser.sequencer.stop();
+            pauseButton.setText("PLAY");
+        } else {
+            parser.sequencer.start();
+            pauseButton.setText("PAUSE");
+        }
+        playing = !playing;
+    }
 
     public static void main(String[] args) throws Exception {
         Renderer.build_coords();
@@ -34,20 +48,53 @@ class Main {
         if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
             file = chooser.getSelectedFile();
         }
-        MidiParser parser = new MidiParser(file);
-        window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        window.setBounds(30, 30, 1350, 800);
-        window.setName("Bongo Cat MIDI Player");
-        window.setVisible(true);
-        window.getContentPane().add(new MyCanvas());
-        executor.execute(new Runnable() {
-            @Override
-            public void run() {
-                while (true){
-                    window.repaint();
+        parser = new MidiParser(file);
+
+        pauseButton = new JButton("PAUSE");
+        pauseButton.setActionCommand("toggle");
+        pauseButton.setMnemonic(KeyEvent.VK_P);
+        pauseButton.addActionListener((ActionEvent e) -> {
+            switch (e.getActionCommand()) {
+                case "toggle": {
+                    togglePlayPause();
+                    break;
+                }
+                default: {
+                    System.err.println("Invalid action: " + e.getActionCommand());
+                    break;
                 }
             }
         });
+        pauseButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+
+        window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        window.setBounds(30, 30, 1350, 800);
+        window.setName("Bongo Cat MIDI Player");
+        window.setTitle("Bongo Cat MIDI Player");
+        window.getContentPane().setLayout(new BoxLayout(window.getContentPane(), BoxLayout.PAGE_AXIS));
+        window.getContentPane().add(new MyCanvas());
+        window.getContentPane().add(pauseButton, BorderLayout.CENTER);
+        window.getContentPane().add(Box.createRigidArea(new Dimension(0,5))); // top padding to button
+        window.getContentPane().setBackground(Color.WHITE);
+        window.getContentPane().add(Box.createRigidArea(new Dimension(0,5))); // bottom padding
+        window.setVisible(true);
+        renderThread = new Thread(() -> {
+            GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+            GraphicsDevice d = ge.getDefaultScreenDevice();
+            int refreshRate = (d.getDisplayMode().getRefreshRate() == DisplayMode.REFRESH_RATE_UNKNOWN) ?
+                    60 : d.getDisplayMode().getRefreshRate();
+            long ms = (long) ((1. / ((double) refreshRate)) * 1000);
+            while (true){
+                try {
+                    Thread.sleep(ms);
+                } catch (Exception e) {
+                    System.out.println("[ERROR] Render thread interrupted");
+                }
+                if (!playing) continue;
+                window.repaint();
+            }
+        });
+        renderThread.start();
         parser.sequencer.start();
     }
 }
