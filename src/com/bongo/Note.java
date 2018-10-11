@@ -18,8 +18,7 @@ public class Note {
             this.cpatch = Renderer.Instr_Categ.values()[this.patch/8];
         }
         this.midi_number = midi_number;
-        this. status = status;
-
+        this.status = status;
     }
 
     @Override

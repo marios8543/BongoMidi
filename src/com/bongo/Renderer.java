@@ -1,7 +1,6 @@
 package com.bongo;
 import java.awt.*;
 import java.util.ArrayList;
-import java.util.Random;
 import javax.imageio.ImageIO;
 
 abstract class Renderer {
@@ -10,10 +9,10 @@ abstract class Renderer {
     private static ArrayList<Integer[]> coords = new ArrayList<>();
 
     static void build_coords(){
-        for(Integer i=0;i<1024;i+=301){
+        for(int i=0;i<1024;i+=301){
             xcoords.add(i);
         }
-        for(Integer i=0;i<720;i+=185){
+        for(int i=0;i<720;i+=185){
             ycoords.add(i);
         }
         for(int a : xcoords){
@@ -26,6 +25,7 @@ abstract class Renderer {
     public static class Bongo {
         Integer x;
         Integer y;
+        Integer lastSecondValue;
         Note note;
         Boolean l_hand=false;
         Boolean r_hand=false;
@@ -62,6 +62,7 @@ abstract class Renderer {
             }
             this.note = note;
 
+            this.lastSecondValue = Main.seconds;
         }
         @Override
         public String toString(){
