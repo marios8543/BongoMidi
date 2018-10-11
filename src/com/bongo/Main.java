@@ -88,7 +88,7 @@ class Main{
                 try {
                     Thread.sleep(ms);
                 } catch (Exception e) {
-                    System.out.println("[ERROR] Render thread interrupted");
+                    JOptionPane.showMessageDialog(window, "Renderer thread interrupted", "Error", JOptionPane.ERROR_MESSAGE);
                 }
                 if (!playing) continue;
                 window.repaint();
