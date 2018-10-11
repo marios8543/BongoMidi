@@ -69,6 +69,7 @@ class Main{
         parser.sequencer.setTickPosition(0);
         seconds = 0;
         togglePlayPause();
+        pauseButton.setActionCommand("toggle");
     }
 
     private static Thread generateTimeThread() {
