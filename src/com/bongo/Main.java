@@ -92,6 +92,8 @@ class Main{
         File file = null;
         if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
             file = chooser.getSelectedFile();
+        } else {
+            System.exit(0);
         }
         parser = new MidiParser(file);
 
@@ -131,8 +133,8 @@ class Main{
 
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         window.setBounds(30, 30, 1350, 800);
-        window.setName("Bongo Cat MIDI Player");
-        window.setTitle("Bongo Cat MIDI Player");
+        window.setName("Bongo Cat MIDI Player - " + file.getName());
+        window.setTitle("Bongo Cat MIDI Player - " + file.getName());
         window.getContentPane().setLayout(new BoxLayout(window.getContentPane(), BoxLayout.PAGE_AXIS));
         window.getContentPane().add(c);
         window.getContentPane().add(buttonPanel, BorderLayout.CENTER);
