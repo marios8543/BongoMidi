@@ -1,6 +1,8 @@
 package com.bongo;
 import java.awt.*;
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.concurrent.TimeUnit;
 import javax.imageio.ImageIO;
 
 abstract class Renderer {
@@ -25,7 +27,7 @@ abstract class Renderer {
     public static class Bongo {
         final Integer x;
         final Integer y;
-        final Integer lastSecondValue;
+        final Long lastSecondValue;
         final Note note;
         Boolean l_hand=false;
         Boolean r_hand=false;
@@ -61,7 +63,7 @@ abstract class Renderer {
                 this.y = c[1];
             }
             this.note = note;
-            this.lastSecondValue = Main.seconds;
+            this.lastSecondValue = TimeUnit.MILLISECONDS.toSeconds(Instant.now().toEpochMilli());
         }
         @Override
         public String toString(){
@@ -71,7 +73,7 @@ abstract class Renderer {
 
     private static final ClassLoader classLoader = Renderer.class.getClassLoader();
 
-    private static Image load_asset(String asset){
+    public static Image load_asset(String asset){
         try{
             return ImageIO.read(classLoader.getResource(asset)).getScaledInstance(380,264,Image.SCALE_FAST);
         }

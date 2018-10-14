@@ -3,29 +3,19 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
+import java.time.Instant;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 class Canvas extends JComponent {
     public void paintComponent(Graphics g){
-        if(Main.parser.sequencer.getMicrosecondPosition()==Main.parser.sequencer.getMicrosecondLength()){
-            Main.finish();
-        }
-        Main.timeLabel.setText(String.format("%02d:%02d/%s",
-                TimeUnit.MICROSECONDS.toMinutes(Main.parser.sequencer.getMicrosecondPosition()),
-                TimeUnit.MICROSECONDS.toSeconds(Main.parser.sequencer.getMicrosecondPosition()) -
-                        TimeUnit.MINUTES.toSeconds(TimeUnit.MICROSECONDS.toMinutes(Main.parser.sequencer.getMicrosecondPosition()))
-                ,Main.lenstr));
-        Main.seekslider.setValue((int)Main.parser.sequencer.getMicrosecondPosition());
-        Main.seekselftrigger=true;
         g.clearRect(0, 0, Main.window.getWidth(), Main.window.getHeight());
         for(int i=0;i<Main.bongos.length;i++){
             Renderer.Bongo bongo = Main.bongos[i];
             if(bongo!=null){
-                if (Main.seconds - 1 > bongo.lastSecondValue) {
+                if (TimeUnit.MILLISECONDS.toSeconds(Instant.now().toEpochMilli()) - 1 > bongo.lastSecondValue) {
                     Main.bongos[i] = null;
                 } else {
                     g.drawImage(bongo.note.cpatch.getAsset(), bongo.x, bongo.y, this);
@@ -36,17 +26,45 @@ class Canvas extends JComponent {
         }
     }
 }
+
 class Main{
     static Renderer.Bongo[] bongos = new Renderer.Bongo[16];
     static final JFrame window = new JFrame();
-    public static MidiParser parser;
+    private static MidiParser parser;
     private static File file = null;
     private static JButton pauseButton;
-    static Boolean seekselftrigger = false;
-    static String lenstr;
-    public static JSlider seekslider;
-    static JLabel timeLabel;
-    static int seconds = 0;
+    private static Boolean seekselftrigger = false;
+    private static String lenstr;
+    private static JSlider seekslider;
+    private static JLabel timeLabel;
+
+    /** @noinspection InfiniteLoopStatement*/
+    private static final Thread renderThread = new Thread(() -> {
+        GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+        GraphicsDevice d = ge.getDefaultScreenDevice();
+        int refreshRate = (d.getDisplayMode().getRefreshRate() == DisplayMode.REFRESH_RATE_UNKNOWN) ?
+                60 : d.getDisplayMode().getRefreshRate();
+        long ms = (long) ((1. / ((double) refreshRate)) * 1000);
+        while (true){
+            try {
+                if(Main.parser.sequencer.getMicrosecondPosition()==Main.parser.sequencer.getMicrosecondLength()){
+                    Main.finish();
+                }
+                Main.timeLabel.setText(String.format("%02d:%02d/%s",
+                        TimeUnit.MICROSECONDS.toMinutes(Main.parser.sequencer.getMicrosecondPosition()),
+                        TimeUnit.MICROSECONDS.toSeconds(Main.parser.sequencer.getMicrosecondPosition()) -
+                                TimeUnit.MINUTES.toSeconds(TimeUnit.MICROSECONDS.toMinutes(Main.parser.sequencer.getMicrosecondPosition()))
+                        ,Main.lenstr));
+                Main.seekslider.setValue((int)Main.parser.sequencer.getMicrosecondPosition());
+                Main.seekselftrigger=true;
+                Thread.sleep(ms);
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(window, e.getMessage(), "Rendering thread error", JOptionPane.ERROR_MESSAGE);
+            }
+            if (!parser.sequencer.isRunning()) continue;
+            window.repaint();
+        }
+    });
 
     private static void togglePlayPause() {
         if (parser.sequencer.isRunning()) {
@@ -58,12 +76,19 @@ class Main{
         }
     }
 
-    static void finish() {
+    private static void finish() {
         pauseButton.setText("RESTART");
         pauseButton.setActionCommand("restart");
         parser.sequencer.stop();
         bongos = new Renderer.Bongo[16];
         window.repaint();
+        Integer ok = JOptionPane.showOptionDialog(window,"BongoCat MIDI Player\nhttps://github.com/marios8543/BongoMidi","Thanks for playing!",JOptionPane.OK_CANCEL_OPTION,JOptionPane.PLAIN_MESSAGE,new ImageIcon(Objects.requireNonNull(Renderer.load_asset("bongo.png"))),null,null);
+        if(ok==JOptionPane.OK_OPTION){
+            restart();
+        }
+        else {
+            System.exit(0);
+        }
     }
 
     private static void restart() {
@@ -72,7 +97,6 @@ class Main{
         window.repaint();
         window.setName("Bongo Cat MIDI Player - " + file.getName());
         window.setTitle("Bongo Cat MIDI Player - " + file.getName());
-        seconds = 0;
         togglePlayPause();
         pauseButton.setActionCommand("toggle");
     }
@@ -190,6 +214,7 @@ class Main{
         window.getContentPane().setBackground(Color.WHITE);
         window.getContentPane().add(Box.createRigidArea(new Dimension(0,5))); // bottom padding
         window.setVisible(true);
+        renderThread.start();
         parser.sequencer.start();
     }
 }

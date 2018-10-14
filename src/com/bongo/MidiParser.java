@@ -41,7 +41,6 @@ class MidiParser {
             if(note!=null){
                 Main.bongos[note.channel] = new Renderer.Bongo(note);
             }
-            Main.window.repaint();
         }
 
         public void close(){}
