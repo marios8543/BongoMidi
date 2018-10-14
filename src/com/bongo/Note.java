@@ -1,12 +1,12 @@
 package com.bongo;
 
-public class Note {
+class Note {
 
-    Integer midi_number;
-    Integer channel;
-    Integer patch;
-    Renderer.Instr_Categ cpatch;
-    Boolean status;
+    final Integer midi_number;
+    final Integer channel;
+    private final Integer patch;
+    final Renderer.Instr_Categ cpatch;
+    final Boolean status;
 
     Note(Integer channel, Integer midi_number, Integer instrument, Boolean status){
         this.patch = instrument;

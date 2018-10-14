@@ -3,11 +3,24 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
+import java.util.concurrent.TimeUnit;
 import javax.swing.*;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 class Canvas extends JComponent {
     public void paintComponent(Graphics g){
+        if(Main.parser.sequencer.getMicrosecondPosition()==Main.parser.sequencer.getMicrosecondLength()){
+            Main.finish();
+        }
+        Main.timeLabel.setText(String.format("%02d:%02d/%s",
+                TimeUnit.MICROSECONDS.toMinutes(Main.parser.sequencer.getMicrosecondPosition()),
+                TimeUnit.MICROSECONDS.toSeconds(Main.parser.sequencer.getMicrosecondPosition()) -
+                        TimeUnit.MINUTES.toSeconds(TimeUnit.MICROSECONDS.toMinutes(Main.parser.sequencer.getMicrosecondPosition()))
+                ,Main.lenstr));
+        Main.seekslider.setValue((int)Main.parser.sequencer.getMicrosecondPosition());
+        Main.seekselftrigger=true;
         g.clearRect(0, 0, Main.window.getWidth(), Main.window.getHeight());
         for(int i=0;i<Main.bongos.length;i++){
             Renderer.Bongo bongo = Main.bongos[i];
@@ -25,78 +38,70 @@ class Canvas extends JComponent {
 }
 class Main{
     static Renderer.Bongo[] bongos = new Renderer.Bongo[16];
-    static JFrame window = new JFrame();
-    private static boolean playing = true;
-    private static MidiParser parser;
+    static final JFrame window = new JFrame();
+    public static MidiParser parser;
+    private static File file = null;
     private static JButton pauseButton;
-    private static JLabel timeLabel;
+    static Boolean seekselftrigger = false;
+    static String lenstr;
+    public static JSlider seekslider;
+    static JLabel timeLabel;
     static int seconds = 0;
-    private static Thread timeThread;
 
     private static void togglePlayPause() {
-        if (playing) {
+        if (parser.sequencer.isRunning()) {
             parser.sequencer.stop();
             pauseButton.setText("PLAY");
-            timeThread.interrupt();
         } else {
             parser.sequencer.start();
             pauseButton.setText("PAUSE");
-            timeThread = generateTimeThread();
-            timeThread.start();
-        }
-        playing = !playing;
-    }
-
-    private static void incrementSeconds() {
-        seconds++;
-        timeLabel.setText(String.format("%02d:%02d", seconds / 60, seconds % 60));
-        if (!parser.sequencer.isRunning()) {
-            finish();
         }
     }
 
-    private static void finish() {
+    static void finish() {
         pauseButton.setText("RESTART");
         pauseButton.setActionCommand("restart");
         parser.sequencer.stop();
-        playing = false;
         bongos = new Renderer.Bongo[16];
         window.repaint();
-        timeThread.interrupt();
     }
 
     private static void restart() {
         parser.sequencer.setTickPosition(0);
+        bongos = new Renderer.Bongo[16];
+        window.repaint();
+        window.setName("Bongo Cat MIDI Player - " + file.getName());
+        window.setTitle("Bongo Cat MIDI Player - " + file.getName());
         seconds = 0;
         togglePlayPause();
         pauseButton.setActionCommand("toggle");
     }
 
-    private static Thread generateTimeThread() {
-        return new Thread(() -> {
-                    while (true) {
-                        try {
-                            Thread.sleep(1000);
-                            incrementSeconds();
-                        } catch (Exception e) {
-                            break;
-                        }
-                    }
-                });
+    private static MidiParser init_player() throws Exception{
+        JFileChooser chooser = new JFileChooser();
+        FileNameExtensionFilter filter = new FileNameExtensionFilter("MIDI Files", "mid", "midi");
+        chooser.setFileFilter(filter);
+        if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+            file = chooser.getSelectedFile();
+        } else {
+            return null;
+        }
+        MidiParser private_parser = new MidiParser(file);
+        lenstr = String.format("%02d:%02d",
+                TimeUnit.MICROSECONDS.toMinutes(private_parser.sequencer.getMicrosecondLength()),
+                TimeUnit.MICROSECONDS.toSeconds(private_parser.sequencer.getMicrosecondLength()) -
+                        TimeUnit.MINUTES.toSeconds(TimeUnit.MICROSECONDS.toMinutes(private_parser.sequencer.getMicrosecondLength())));
+        seekslider = new JSlider(0,(int)private_parser.sequencer.getMicrosecondLength());
+        return private_parser;
     }
 
     public static void main(String[] args) throws Exception {
         Renderer.build_coords();
-        JFileChooser chooser = new JFileChooser();
-        FileNameExtensionFilter filter = new FileNameExtensionFilter("MIDI Files", "mid", "midi");
-        chooser.setFileFilter(filter);
-        File file = null;
-        if (chooser.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
-            file = chooser.getSelectedFile();
-        } else {
+
+        parser = init_player();
+        if(parser==null){
             System.exit(0);
         }
-        parser = new MidiParser(file);
 
         JPanel buttonPanel = new JPanel();
         buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.LINE_AXIS));
@@ -123,11 +128,53 @@ class Main{
         });
         pauseButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        timeLabel = new JLabel("00:00");
+        JButton openButton = new JButton("Open file");
+        openButton.addActionListener(e -> {
+            togglePlayPause();
+            try{
+                MidiParser private_parser = init_player();
+                if(private_parser==null){
+                    togglePlayPause();
+                }
+                else {
+                    parser = private_parser;
+                    restart();
+                }
+            }
+            catch (Exception ee){
+                JOptionPane.showMessageDialog(window, ee.getMessage(), "File open error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
 
+        timeLabel = new JLabel("00:00");
+        openButton.setAlignmentX(Component.RIGHT_ALIGNMENT);
+        buttonPanel.add(openButton);
+        buttonPanel.add(Box.createRigidArea(new Dimension(50,0)));
         buttonPanel.add(pauseButton);
         buttonPanel.add(Box.createRigidArea(new Dimension(10,0)));
+
+        JSlider speedSlider = new JSlider(33, 300);
+        speedSlider.addChangeListener(e -> {
+            JSlider source = (JSlider)e.getSource();
+            parser.sequencer.setTempoInBPM((float) source.getValue());
+        });
+        buttonPanel.add(Box.createRigidArea(new Dimension(100,0)));
+        JLabel speed = new JLabel("Speed:");
+        buttonPanel.add(speed);
+        buttonPanel.add(speedSlider);
+
+        buttonPanel.add(Box.createRigidArea(new Dimension(50,0)));
+        seekslider = new JSlider(0,(int)parser.sequencer.getMicrosecondLength());
+        seekslider.addChangeListener(e -> {
+            JSlider source = (JSlider)e.getSource();
+            if(seekselftrigger){
+                seekselftrigger=false;
+                return;
+            }
+            parser.sequencer.setMicrosecondPosition(source.getValue());
+        });
         buttonPanel.add(timeLabel);
+        buttonPanel.add(seekslider);
 
         Canvas c = new Canvas();
         c.setLocation(new Point(0, 0));
@@ -143,8 +190,6 @@ class Main{
         window.getContentPane().setBackground(Color.WHITE);
         window.getContentPane().add(Box.createRigidArea(new Dimension(0,5))); // bottom padding
         window.setVisible(true);
-        timeThread = generateTimeThread();
-        timeThread.start();
         parser.sequencer.start();
     }
 }

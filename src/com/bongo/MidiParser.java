@@ -1,9 +1,7 @@
 package com.bongo;
-
 import javax.sound.midi.*;
 import java.io.File;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -20,10 +18,10 @@ class MidiParser {
     }
 
 
-    public static class creceiver implements Receiver {
-        Map<Integer,Integer> v_instrs = new HashMap<>();
-        ArrayList<Integer> v_ons = new ArrayList<>();
-        ArrayList<Integer> v_offs = new ArrayList<>();
+    static class creceiver implements Receiver {
+        final Map<Integer,Integer> v_instrs = new HashMap<>();
+        final ArrayList<Integer> v_ons = new ArrayList<>();
+        final ArrayList<Integer> v_offs = new ArrayList<>();
 
         creceiver(){
             for(int i=192;i<=207;i++){

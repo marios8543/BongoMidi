@@ -4,9 +4,9 @@ import java.util.ArrayList;
 import javax.imageio.ImageIO;
 
 abstract class Renderer {
-    private static ArrayList<Integer> xcoords = new ArrayList<>();
-    private static ArrayList<Integer> ycoords = new ArrayList<>();
-    private static ArrayList<Integer[]> coords = new ArrayList<>();
+    private static final ArrayList<Integer> xcoords = new ArrayList<>();
+    private static final ArrayList<Integer> ycoords = new ArrayList<>();
+    private static final ArrayList<Integer[]> coords = new ArrayList<>();
 
     static void build_coords(){
         for(int i=0;i<1024;i+=301){
@@ -23,10 +23,10 @@ abstract class Renderer {
     }
 
     public static class Bongo {
-        Integer x;
-        Integer y;
-        Integer lastSecondValue;
-        Note note;
+        final Integer x;
+        final Integer y;
+        final Integer lastSecondValue;
+        final Note note;
         Boolean l_hand=false;
         Boolean r_hand=false;
 
@@ -61,7 +61,6 @@ abstract class Renderer {
                 this.y = c[1];
             }
             this.note = note;
-
             this.lastSecondValue = Main.seconds;
         }
         @Override
@@ -70,7 +69,7 @@ abstract class Renderer {
         }
     }
 
-    private static ClassLoader classLoader = Renderer.class.getClassLoader();
+    private static final ClassLoader classLoader = Renderer.class.getClassLoader();
 
     private static Image load_asset(String asset){
         try{
@@ -97,7 +96,7 @@ abstract class Renderer {
         Ethnic(load_asset("ensemble.png")),
         Percussion(load_asset("drums.png")),
         FX(load_asset("ensemble.png"));
-        private Image asset;
+        private final Image asset;
         Instr_Categ(Image s){
             this.asset = s;
         }
@@ -111,11 +110,11 @@ abstract class Renderer {
         lh2(load_asset("l2.png")),
         rh1(load_asset("r1.png")),
         rh2(load_asset("r2.png"));
-        private Image hand;
+        private final Image hand;
         hands(Image s){
             this.hand = s;
         }
-        public Image get_hand(){
+        Image get_hand(){
             return hand;
         }
     }
