@@ -35,7 +35,7 @@ class Main{
     private static JButton pauseButton;
     private static Boolean seekselftrigger = false;
     private static String lenstr;
-    private static JSlider seekslider;
+    private static JSlider seekslider = new JSlider(0,0);
     private static JLabel timeLabel;
 
     /** @noinspection InfiniteLoopStatement*/
@@ -92,7 +92,7 @@ class Main{
     }
 
     private static void restart() {
-        parser.sequencer.setTickPosition(0);
+        parser.sequencer.setMicrosecondPosition(0);
         bongos = new Renderer.Bongo[16];
         window.repaint();
         window.setName("Bongo Cat MIDI Player - " + file.getName());
@@ -115,7 +115,7 @@ class Main{
                 TimeUnit.MICROSECONDS.toMinutes(private_parser.sequencer.getMicrosecondLength()),
                 TimeUnit.MICROSECONDS.toSeconds(private_parser.sequencer.getMicrosecondLength()) -
                         TimeUnit.MINUTES.toSeconds(TimeUnit.MICROSECONDS.toMinutes(private_parser.sequencer.getMicrosecondLength())));
-        seekslider = new JSlider(0,(int)private_parser.sequencer.getMicrosecondLength());
+        seekslider.setMaximum((int)private_parser.sequencer.getMicrosecondLength());
         return private_parser;
     }
 
