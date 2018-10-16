@@ -4,6 +4,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.concurrent.TimeUnit;
 import javax.imageio.ImageIO;
+import com.bongo.MidiParser.Note;
 
 abstract class Renderer {
     private static final ArrayList<Integer> xcoords = new ArrayList<>();
