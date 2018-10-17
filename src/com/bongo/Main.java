@@ -1,11 +1,13 @@
 package com.bongo;
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.time.Instant;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import javax.sound.midi.Sequencer;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
@@ -37,6 +39,8 @@ class Main{
     private static String lenstr;
     private static JSlider seekslider = new JSlider(0,0);
     private static JLabel timeLabel;
+    private static JLabel speed;
+    private static JSlider speedSlider;
 
     /** @noinspection InfiniteLoopStatement*/
     private static final Thread renderThread = new Thread(() -> {
@@ -123,7 +127,7 @@ class Main{
         Renderer.build_coords();
 
         parser = init_player();
-        if(parser==null){
+        if (parser == null) {
             System.exit(0);
         }
 
@@ -131,6 +135,7 @@ class Main{
         buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.LINE_AXIS));
         buttonPanel.setBackground(Color.WHITE);
 
+        timeLabel = new JLabel("00:00");
         pauseButton = new JButton("PAUSE");
         pauseButton.setActionCommand("toggle");
         pauseButton.setMnemonic(KeyEvent.VK_P);
@@ -155,50 +160,60 @@ class Main{
         JButton openButton = new JButton("Open file");
         openButton.addActionListener(e -> {
             togglePlayPause();
-            try{
+            try {
                 MidiParser private_parser = init_player();
-                if(private_parser==null){
+                if (private_parser == null) {
                     togglePlayPause();
-                }
-                else {
+                } else {
                     parser = private_parser;
                     restart();
                 }
-            }
-            catch (Exception ee){
+            } catch (Exception ee) {
                 JOptionPane.showMessageDialog(window, ee.getMessage(), "File open error", JOptionPane.ERROR_MESSAGE);
             }
         });
 
-        timeLabel = new JLabel("00:00");
-        openButton.setAlignmentX(Component.RIGHT_ALIGNMENT);
-        buttonPanel.add(openButton);
-        buttonPanel.add(Box.createRigidArea(new Dimension(50,0)));
-        buttonPanel.add(pauseButton);
-        buttonPanel.add(Box.createRigidArea(new Dimension(10,0)));
+        JCheckBox loop = new JCheckBox("Loop");
+        loop.addActionListener(e -> {
+            JCheckBox chk = (JCheckBox) e.getSource();
+            if (chk.isSelected()) {
+                parser.sequencer.setLoopCount(Sequencer.LOOP_CONTINUOUSLY);
+            } else {
+                parser.sequencer.setLoopCount(0);
+            }
+        });
 
-        JSlider speedSlider = new JSlider(33, 300);
+        speed = new JLabel("Speed:");
+        speedSlider = new JSlider(33, 300);
         speedSlider.addChangeListener(e -> {
-            JSlider source = (JSlider)e.getSource();
+            JSlider source = (JSlider) e.getSource();
             parser.sequencer.setTempoInBPM((float) source.getValue());
         });
-        buttonPanel.add(Box.createRigidArea(new Dimension(100,0)));
-        JLabel speed = new JLabel("Speed:");
-        buttonPanel.add(speed);
-        buttonPanel.add(speedSlider);
 
-        buttonPanel.add(Box.createRigidArea(new Dimension(50,0)));
-        seekslider = new JSlider(0,(int)parser.sequencer.getMicrosecondLength());
+        seekslider = new JSlider(0, (int) parser.sequencer.getMicrosecondLength());
         seekslider.addChangeListener(e -> {
-            JSlider source = (JSlider)e.getSource();
-            if(seekselftrigger){
-                seekselftrigger=false;
+            JSlider source = (JSlider) e.getSource();
+            if (seekselftrigger) {
+                seekselftrigger = false;
                 return;
             }
             parser.sequencer.setMicrosecondPosition(source.getValue());
         });
+
+        openButton.setAlignmentX(Component.RIGHT_ALIGNMENT);
+        buttonPanel.add(openButton);
+        buttonPanel.add(Box.createRigidArea(new Dimension(30, 0)));
+        buttonPanel.add(pauseButton);
+        buttonPanel.add(Box.createRigidArea(new Dimension(30, 0)));
+        buttonPanel.add(loop);
+        buttonPanel.add(Box.createRigidArea(new Dimension(30, 0)));
         buttonPanel.add(timeLabel);
+        buttonPanel.add(Box.createRigidArea(new Dimension(5, 0)));
         buttonPanel.add(seekslider);
+        buttonPanel.add(Box.createRigidArea(new Dimension(30, 0)));
+        buttonPanel.add(speed);
+        buttonPanel.add(speedSlider);
+
 
         Canvas c = new Canvas();
         c.setLocation(new Point(0, 0));
@@ -210,9 +225,9 @@ class Main{
         window.getContentPane().setLayout(new BoxLayout(window.getContentPane(), BoxLayout.PAGE_AXIS));
         window.getContentPane().add(c);
         window.getContentPane().add(buttonPanel, BorderLayout.CENTER);
-        window.getContentPane().add(Box.createRigidArea(new Dimension(0,5))); // top padding to button
+        window.getContentPane().add(Box.createRigidArea(new Dimension(0, 5))); // top padding to button
         window.getContentPane().setBackground(Color.WHITE);
-        window.getContentPane().add(Box.createRigidArea(new Dimension(0,5))); // bottom padding
+        window.getContentPane().add(Box.createRigidArea(new Dimension(0, 5))); // bottom padding
         window.setVisible(true);
         renderThread.start();
         parser.sequencer.start();

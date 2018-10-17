@@ -2,6 +2,7 @@ package com.bongo;
 import java.awt.*;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import javax.imageio.ImageIO;
 import com.bongo.MidiParser.Note;
@@ -76,7 +77,7 @@ abstract class Renderer {
 
     public static Image load_asset(String asset){
         try{
-            return ImageIO.read(classLoader.getResource(asset)).getScaledInstance(380,264,Image.SCALE_FAST);
+            return ImageIO.read(Objects.requireNonNull(classLoader.getResource(asset))).getScaledInstance(380,264,Image.SCALE_FAST);
         }
         catch (Exception e){
             return null;
