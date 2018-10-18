@@ -1,4 +1,5 @@
-#![BongoCat](https://raw.githubusercontent.com/marios8543/BongoMidi/master/resources/bongo.png) BongoMidi
+![BongoCat](https://raw.githubusercontent.com/marios8543/BongoMidi/master/resources/bongo.png =400x225)
+# BongoMidi
 
 What more isn't there to love about bongo cats?!
 To run, simply download the JAR file under the releases tab. Either double-click on the resulting JAR, or, run the following:
