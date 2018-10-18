@@ -85,7 +85,7 @@ abstract class Renderer {
     }
     public enum Instr_Categ{
         Piano(load_asset("keyboard.png")),
-        CPerc(load_asset("drums.png")),
+        CPerc(load_asset("marimba.png")),
         Organ(load_asset("organ.png")),
         Guitar(load_asset("guitar.png")),
         Bass(load_asset("guitar.png")),

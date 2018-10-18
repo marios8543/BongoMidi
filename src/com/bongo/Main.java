@@ -1,7 +1,6 @@
 package com.bongo;
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.time.Instant;
@@ -39,8 +38,6 @@ class Main{
     private static String lenstr;
     private static JSlider seekslider = new JSlider(0,0);
     private static JLabel timeLabel;
-    private static JLabel speed;
-    private static JSlider speedSlider;
 
     /** @noinspection InfiniteLoopStatement*/
     private static final Thread renderThread = new Thread(() -> {
@@ -159,11 +156,16 @@ class Main{
 
         JButton openButton = new JButton("Open file");
         openButton.addActionListener(e -> {
-            togglePlayPause();
+            Boolean isplaying = parser.sequencer.isRunning();
+            if(isplaying){
+                togglePlayPause();
+            }
             try {
                 MidiParser private_parser = init_player();
                 if (private_parser == null) {
-                    togglePlayPause();
+                    if(isplaying){
+                        togglePlayPause();
+                    }
                 } else {
                     parser = private_parser;
                     restart();
@@ -183,8 +185,8 @@ class Main{
             }
         });
 
-        speed = new JLabel("Speed:");
-        speedSlider = new JSlider(33, 300);
+        JLabel speed = new JLabel("Speed:");
+        JSlider speedSlider = new JSlider(33, 300);
         speedSlider.addChangeListener(e -> {
             JSlider source = (JSlider) e.getSource();
             parser.sequencer.setTempoInBPM((float) source.getValue());
