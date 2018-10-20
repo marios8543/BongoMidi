@@ -36,6 +36,7 @@ class Main{
     private static File file = null;
     private static JButton pauseButton;
     private static boolean seekselftrigger = false;
+    private static boolean finishTrigger = true;
     private static String lenstr;
     private static JSlider seekslider = new JSlider(0,0);
     private static JLabel timeLabel;
@@ -48,9 +49,6 @@ class Main{
         long ms = (long) ((1. / ((double) refreshRate)) * 1000);
         while (true){
             try {
-                if(Main.parser.sequencer.getMicrosecondPosition()==Main.parser.sequencer.getMicrosecondLength()){
-                    Main.finish();
-                }
                 Main.timeLabel.setText(String.format("%02d:%02d/%s",
                         TimeUnit.MICROSECONDS.toMinutes(Main.parser.sequencer.getMicrosecondPosition()),
                         TimeUnit.MICROSECONDS.toSeconds(Main.parser.sequencer.getMicrosecondPosition()) -
@@ -62,6 +60,9 @@ class Main{
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(window, e.getMessage(), "Rendering thread error", JOptionPane.ERROR_MESSAGE);
                 break;
+            }
+            if(Main.parser.sequencer.getMicrosecondPosition()==Main.parser.sequencer.getMicrosecondLength()){
+                if (finishTrigger) Main.finish();
             }
             if (!parser.sequencer.isRunning()) continue;
             window.repaint();
@@ -84,6 +85,7 @@ class Main{
         parser.sequencer.stop();
         bongos = new Renderer.Bongo[16];
         window.repaint();
+        finishTrigger = false;
         int ok = JOptionPane.showOptionDialog(window,
                 "BongoCat MIDI Player\nhttps://github.com/marios8543/BongoMidi\nRestart?",
                 "Thanks for playing!",JOptionPane.YES_NO_OPTION,JOptionPane.PLAIN_MESSAGE,
@@ -102,6 +104,7 @@ class Main{
         window.setTitle("Bongo Cat MIDI Player - " + file.getName());
         togglePlayPause();
         pauseButton.setActionCommand("toggle");
+        finishTrigger = true;
     }
 
     private static MidiParser init_player() throws Exception{

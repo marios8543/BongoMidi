@@ -83,7 +83,6 @@ abstract class Renderer {
             return null;
         }
     }
-
     public enum Instr_Categ{
         Piano(load_asset("keyboard.png")),
         CPerc(load_asset("marimba.png")),
@@ -123,7 +122,6 @@ abstract class Renderer {
             return hand;
         }
     }
-
     static Image get_lhand(Boolean state) {
         if (!state) {
             return hands.lh1.get_hand();
