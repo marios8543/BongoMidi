@@ -3,6 +3,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
+import java.net.URI;
 import java.time.Instant;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -34,12 +35,11 @@ class Main{
     private static MidiParser parser;
     private static File file = null;
     private static JButton pauseButton;
-    private static Boolean seekselftrigger = false;
+    private static boolean seekselftrigger = false;
     private static String lenstr;
     private static JSlider seekslider = new JSlider(0,0);
     private static JLabel timeLabel;
 
-    /** @noinspection InfiniteLoopStatement*/
     private static final Thread renderThread = new Thread(() -> {
         GraphicsEnvironment ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
         GraphicsDevice d = ge.getDefaultScreenDevice();
@@ -61,6 +61,7 @@ class Main{
                 Thread.sleep(ms);
             } catch (Exception e) {
                 JOptionPane.showMessageDialog(window, e.getMessage(), "Rendering thread error", JOptionPane.ERROR_MESSAGE);
+                break;
             }
             if (!parser.sequencer.isRunning()) continue;
             window.repaint();
@@ -70,25 +71,22 @@ class Main{
     private static void togglePlayPause() {
         if (parser.sequencer.isRunning()) {
             parser.sequencer.stop();
-            pauseButton.setText("PLAY");
+            pauseButton.setText("Play");
         } else {
             parser.sequencer.start();
-            pauseButton.setText("PAUSE");
+            pauseButton.setText("Pause");
         }
     }
 
     private static void finish() {
-        pauseButton.setText("RESTART");
+        pauseButton.setText("Restart");
         pauseButton.setActionCommand("restart");
         parser.sequencer.stop();
         bongos = new Renderer.Bongo[16];
         window.repaint();
-        Integer ok = JOptionPane.showOptionDialog(window,"BongoCat MIDI Player\nhttps://github.com/marios8543/BongoMidi","Thanks for playing!",JOptionPane.OK_CANCEL_OPTION,JOptionPane.PLAIN_MESSAGE,new ImageIcon(Objects.requireNonNull(Renderer.load_asset("bongo.png"))),null,null);
-        if(ok==JOptionPane.OK_OPTION){
+        int ok = JOptionPane.showOptionDialog(window,"BongoCat MIDI Player\nhttps://github.com/marios8543/BongoMidi\nRestart?","Thanks for playing!",JOptionPane.YES_NO_OPTION,JOptionPane.PLAIN_MESSAGE,new ImageIcon(Objects.requireNonNull(Renderer.load_asset("bongo.png"))),null,null);
+        if(ok==JOptionPane.YES_OPTION){
             restart();
-        }
-        else {
-            System.exit(0);
         }
     }
 
@@ -156,7 +154,7 @@ class Main{
 
         JButton openButton = new JButton("Open file");
         openButton.addActionListener(e -> {
-            Boolean isplaying = parser.sequencer.isRunning();
+            boolean isplaying = parser.sequencer.isRunning();
             if(isplaying){
                 togglePlayPause();
             }
@@ -202,10 +200,29 @@ class Main{
             parser.sequencer.setMicrosecondPosition(source.getValue());
         });
 
+        JButton forkButton = new JButton("Fork me on GitHub!");
+        forkButton.addActionListener(e -> {
+            switch (e.getActionCommand()) {
+                case "fork": {
+                    if (Desktop.isDesktopSupported()) {
+                        try {
+                            Desktop.getDesktop().browse(new URI("https://github.com/marios8543/BongoMidi"));
+                        } catch (Exception ex) {
+                            JOptionPane.showMessageDialog(window, ex.getMessage(), "Error opening GitHub page",
+                                    JOptionPane.ERROR_MESSAGE);
+                        }
+                    }
+                }
+            }
+        });
+        forkButton.setActionCommand("fork");
+
         openButton.setAlignmentX(Component.RIGHT_ALIGNMENT);
         buttonPanel.add(openButton);
         buttonPanel.add(Box.createRigidArea(new Dimension(30, 0)));
         buttonPanel.add(pauseButton);
+        buttonPanel.add(Box.createRigidArea(new Dimension(30, 0)));
+        buttonPanel.add(forkButton);
         buttonPanel.add(Box.createRigidArea(new Dimension(30, 0)));
         buttonPanel.add(loop);
         buttonPanel.add(Box.createRigidArea(new Dimension(30, 0)));
@@ -233,5 +250,7 @@ class Main{
         window.setVisible(true);
         renderThread.start();
         parser.sequencer.start();
+
+        speedSlider.setValue((int) parser.sequencer.getTempoInBPM());
     }
 }

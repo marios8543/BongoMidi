@@ -75,7 +75,7 @@ abstract class Renderer {
 
     private static final ClassLoader classLoader = Renderer.class.getClassLoader();
 
-    public static Image load_asset(String asset){
+    static Image load_asset(String asset){
         try{
             return ImageIO.read(Objects.requireNonNull(classLoader.getResource(asset))).getScaledInstance(380,264,Image.SCALE_FAST);
         }
@@ -83,6 +83,7 @@ abstract class Renderer {
             return null;
         }
     }
+
     public enum Instr_Categ{
         Piano(load_asset("keyboard.png")),
         CPerc(load_asset("marimba.png")),
@@ -122,6 +123,7 @@ abstract class Renderer {
             return hand;
         }
     }
+
     static Image get_lhand(Boolean state) {
         if (!state) {
             return hands.lh1.get_hand();
