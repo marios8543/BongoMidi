@@ -200,11 +200,8 @@ class Main{
         JCheckBox loop = new JCheckBox("Loop");
         loop.addActionListener(e -> {
             JCheckBox chk = (JCheckBox) e.getSource();
-            if (chk.isSelected()) {
-                parser.sequencer.setLoopCount(Sequencer.LOOP_CONTINUOUSLY);
-            } else {
-                parser.sequencer.setLoopCount(0);
-            }
+            parser.sequencer.setLoopCount(chk.isSelected() ?
+                    Sequencer.LOOP_CONTINUOUSLY : 0);
         });
         loop.setBackground(Color.WHITE);
 
@@ -236,6 +233,10 @@ class Main{
                     parser.sequencer.stop();
                     bongos = new Renderer.Bongo[16];
                     parser = private_parser;
+
+                    parser.sequencer.setLoopCount(loop.isSelected() ?
+                            Sequencer.LOOP_CONTINUOUSLY : 0);
+
                     parser.sequencer.start();
 
                     speedSlider.setValue((int) parser.sequencer.getTempoInBPM());
