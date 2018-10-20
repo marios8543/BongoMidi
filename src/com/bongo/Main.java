@@ -84,7 +84,11 @@ class Main{
         parser.sequencer.stop();
         bongos = new Renderer.Bongo[16];
         window.repaint();
-        int ok = JOptionPane.showOptionDialog(window,"BongoCat MIDI Player\nhttps://github.com/marios8543/BongoMidi\nRestart?","Thanks for playing!",JOptionPane.YES_NO_OPTION,JOptionPane.PLAIN_MESSAGE,new ImageIcon(Objects.requireNonNull(Renderer.load_asset("bongo.png"))),null,null);
+        int ok = JOptionPane.showOptionDialog(window,
+                "BongoCat MIDI Player\nhttps://github.com/marios8543/BongoMidi\nRestart?",
+                "Thanks for playing!",JOptionPane.YES_NO_OPTION,JOptionPane.PLAIN_MESSAGE,
+                new ImageIcon(Objects.requireNonNull(Renderer.load_asset("bongo.png"))),
+                null,null);
         if(ok==JOptionPane.YES_OPTION){
             restart();
         }
@@ -110,6 +114,8 @@ class Main{
             return null;
         }
         MidiParser private_parser = new MidiParser(file);
+        window.setName("Bongo Cat MIDI Player - " + file.getName());
+        window.setTitle("Bongo Cat MIDI Player - " + file.getName());
         lenstr = String.format("%02d:%02d",
                 TimeUnit.MICROSECONDS.toMinutes(private_parser.sequencer.getMicrosecondLength()),
                 TimeUnit.MICROSECONDS.toSeconds(private_parser.sequencer.getMicrosecondLength()) -
@@ -131,7 +137,7 @@ class Main{
         buttonPanel.setBackground(Color.WHITE);
 
         timeLabel = new JLabel("00:00");
-        pauseButton = new JButton("PAUSE");
+        pauseButton = new JButton("Pause");
         pauseButton.setActionCommand("toggle");
         pauseButton.setMnemonic(KeyEvent.VK_P);
         pauseButton.addActionListener((ActionEvent e) -> {
@@ -152,27 +158,6 @@ class Main{
         });
         pauseButton.setAlignmentX(Component.CENTER_ALIGNMENT);
 
-        JButton openButton = new JButton("Open file");
-        openButton.addActionListener(e -> {
-            boolean isplaying = parser.sequencer.isRunning();
-            if(isplaying){
-                togglePlayPause();
-            }
-            try {
-                MidiParser private_parser = init_player();
-                if (private_parser == null) {
-                    if(isplaying){
-                        togglePlayPause();
-                    }
-                } else {
-                    parser = private_parser;
-                    restart();
-                }
-            } catch (Exception ee) {
-                JOptionPane.showMessageDialog(window, ee.getMessage(), "File open error", JOptionPane.ERROR_MESSAGE);
-            }
-        });
-
         JCheckBox loop = new JCheckBox("Loop");
         loop.addActionListener(e -> {
             JCheckBox chk = (JCheckBox) e.getSource();
@@ -182,6 +167,7 @@ class Main{
                 parser.sequencer.setLoopCount(0);
             }
         });
+        loop.setBackground(Color.WHITE);
 
         JLabel speed = new JLabel("Speed:");
         JSlider speedSlider = new JSlider(33, 300);
@@ -189,6 +175,7 @@ class Main{
             JSlider source = (JSlider) e.getSource();
             parser.sequencer.setTempoInBPM((float) source.getValue());
         });
+        speedSlider.setBackground(Color.WHITE);
 
         seekslider = new JSlider(0, (int) parser.sequencer.getMicrosecondLength());
         seekslider.addChangeListener(e -> {
@@ -198,6 +185,24 @@ class Main{
                 return;
             }
             parser.sequencer.setMicrosecondPosition(source.getValue());
+        });
+        seekslider.setBackground(Color.WHITE);
+
+        JButton openButton = new JButton("Open file");
+        openButton.addActionListener(e -> {
+            try {
+                MidiParser private_parser = init_player();
+                if (private_parser != null) {
+                    parser.sequencer.stop();
+                    bongos = new Renderer.Bongo[16];
+                    parser = private_parser;
+                    parser.sequencer.start();
+
+                    speedSlider.setValue((int) parser.sequencer.getTempoInBPM());
+                }
+            } catch (Exception ee) {
+                JOptionPane.showMessageDialog(window, ee.getMessage(), "File open error", JOptionPane.ERROR_MESSAGE);
+            }
         });
 
         JButton forkButton = new JButton("Fork me on GitHub!");
@@ -218,6 +223,7 @@ class Main{
         forkButton.setActionCommand("fork");
 
         openButton.setAlignmentX(Component.RIGHT_ALIGNMENT);
+        buttonPanel.add(Box.createRigidArea(new Dimension(5,0)));
         buttonPanel.add(openButton);
         buttonPanel.add(Box.createRigidArea(new Dimension(30, 0)));
         buttonPanel.add(pauseButton);
@@ -238,9 +244,7 @@ class Main{
         c.setLocation(new Point(0, 0));
 
         window.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        window.setBounds(30, 30, 1350, 800);
-        window.setName("Bongo Cat MIDI Player - " + file.getName());
-        window.setTitle("Bongo Cat MIDI Player - " + file.getName());
+        window.setBounds(30, 30, 1350, 850);
         window.getContentPane().setLayout(new BoxLayout(window.getContentPane(), BoxLayout.PAGE_AXIS));
         window.getContentPane().add(c);
         window.getContentPane().add(buttonPanel, BorderLayout.CENTER);
