@@ -188,6 +188,7 @@ class Main{
                 return;
             }
             parser.sequencer.setMicrosecondPosition(source.getValue());
+            parser.sequencer.setTempoInBPM(speedSlider.getValue());
         });
         seekslider.setBackground(Color.WHITE);
 
