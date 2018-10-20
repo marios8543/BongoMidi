@@ -3,10 +3,13 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.io.File;
+import java.io.IOException;
 import java.net.URI;
 import java.time.Instant;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
+import javax.sound.midi.InvalidMidiDataException;
+import javax.sound.midi.MidiUnavailableException;
 import javax.sound.midi.Sequencer;
 import javax.swing.*;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -107,7 +110,7 @@ class Main{
         finishTrigger = true;
     }
 
-    private static MidiParser init_player() throws Exception{
+    private static MidiParser init_player(){
         JFileChooser chooser = new JFileChooser();
         FileNameExtensionFilter filter = new FileNameExtensionFilter("MIDI Files", "mid", "midi");
         chooser.setFileFilter(filter);
@@ -116,7 +119,35 @@ class Main{
         } else {
             return null;
         }
-        MidiParser private_parser = new MidiParser(file);
+        if (!file.exists()) {
+            int result = JOptionPane.showConfirmDialog(window,
+                    file.getAbsolutePath() + " does not exist. Try again?",
+                    "File not found", JOptionPane.YES_NO_OPTION, JOptionPane.ERROR_MESSAGE);
+            if (result == JOptionPane.YES_OPTION) {
+                return init_player();
+            } else {
+                return null;
+            }
+        }
+        if (!file.canRead()) {
+            JOptionPane.showMessageDialog(window,
+                    file.getAbsolutePath() + " cannot be read. Please fix your permissions and try again.",
+                    "File cannot be read", JOptionPane.ERROR_MESSAGE);
+            return null;
+        }
+        MidiParser private_parser;
+        try {
+            private_parser = new MidiParser(file);
+        } catch (MidiUnavailableException m) {
+            JOptionPane.showMessageDialog(window, m.getMessage(), "MIDI Unavailable", JOptionPane.ERROR_MESSAGE);
+            return null;
+        } catch (InvalidMidiDataException i) {
+            JOptionPane.showMessageDialog(window, i.getMessage(), "Invalid MIDI Data", JOptionPane.ERROR_MESSAGE);
+            return null;
+        } catch (IOException e) {
+            JOptionPane.showMessageDialog(window, e.getMessage(), "IO Exception", JOptionPane.ERROR_MESSAGE);
+            return null;
+        }
         window.setName("Bongo Cat MIDI Player - " + file.getName());
         window.setTitle("Bongo Cat MIDI Player - " + file.getName());
         lenstr = String.format("%02d:%02d.%03d",
@@ -127,7 +158,7 @@ class Main{
         return private_parser;
     }
 
-    public static void main(String[] args) throws Exception {
+    public static void main(String[] args) {
         Renderer.build_coords();
 
         parser = init_player();

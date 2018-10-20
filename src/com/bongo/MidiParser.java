@@ -1,6 +1,7 @@
 package com.bongo;
 import javax.sound.midi.*;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -8,7 +9,7 @@ import java.util.Map;
 class MidiParser {
     Sequencer sequencer;
 
-    MidiParser(File file) throws Exception{
+    MidiParser(File file) throws MidiUnavailableException, InvalidMidiDataException, IOException {
         sequencer = MidiSystem.getSequencer();
         Sequence seq = MidiSystem.getSequence(file);
         sequencer.setSequence(seq);
