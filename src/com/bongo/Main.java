@@ -49,11 +49,11 @@ class Main{
         long ms = (long) ((1. / ((double) refreshRate)) * 1000);
         while (true){
             try {
-                Main.timeLabel.setText(String.format("%02d:%02d/%s",
+                Main.timeLabel.setText(String.format("%02d:%02d.%03d/%s",
                         TimeUnit.MICROSECONDS.toMinutes(Main.parser.sequencer.getMicrosecondPosition()),
-                        TimeUnit.MICROSECONDS.toSeconds(Main.parser.sequencer.getMicrosecondPosition()) -
-                                TimeUnit.MINUTES.toSeconds(TimeUnit.MICROSECONDS.toMinutes(Main.parser.sequencer.getMicrosecondPosition()))
-                        ,Main.lenstr));
+                        TimeUnit.MICROSECONDS.toSeconds(Main.parser.sequencer.getMicrosecondPosition()) % 60,
+                        Main.parser.sequencer.getMicrosecondPosition() % 1000,
+                        Main.lenstr));
                 Main.seekslider.setValue((int)Main.parser.sequencer.getMicrosecondPosition());
                 Main.seekselftrigger=true;
                 Thread.sleep(ms);
@@ -119,10 +119,10 @@ class Main{
         MidiParser private_parser = new MidiParser(file);
         window.setName("Bongo Cat MIDI Player - " + file.getName());
         window.setTitle("Bongo Cat MIDI Player - " + file.getName());
-        lenstr = String.format("%02d:%02d",
+        lenstr = String.format("%02d:%02d.%03d",
                 TimeUnit.MICROSECONDS.toMinutes(private_parser.sequencer.getMicrosecondLength()),
-                TimeUnit.MICROSECONDS.toSeconds(private_parser.sequencer.getMicrosecondLength()) -
-                        TimeUnit.MINUTES.toSeconds(TimeUnit.MICROSECONDS.toMinutes(private_parser.sequencer.getMicrosecondLength())));
+                TimeUnit.MICROSECONDS.toSeconds(private_parser.sequencer.getMicrosecondLength()) % 60,
+                private_parser.sequencer.getMicrosecondLength() % 1000);
         seekslider.setMaximum((int)private_parser.sequencer.getMicrosecondLength());
         return private_parser;
     }
