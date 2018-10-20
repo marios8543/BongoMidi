@@ -34,6 +34,21 @@ abstract class Renderer {
         Boolean l_hand=false;
         Boolean r_hand=false;
 
+        // only use this with the final animation
+        Bongo() {
+            x = 0;
+            y = 0;
+            lastSecondValue = 0L;
+            note = new Note();
+            l_hand = true;
+        }
+
+        // same goes here
+        void swap() {
+            l_hand = !l_hand;
+            r_hand = !r_hand;
+        }
+
         Bongo(Note note) {
             if(note.status){
                 if(note.cpatch==Instr_Categ.Percussion || note.cpatch==Instr_Categ.CPerc){
@@ -75,7 +90,7 @@ abstract class Renderer {
 
     private static final ClassLoader classLoader = Renderer.class.getClassLoader();
 
-    static Image load_asset(String asset){
+    private static Image load_asset(String asset){
         try{
             return ImageIO.read(Objects.requireNonNull(classLoader.getResource(asset))).getScaledInstance(380,264,Image.SCALE_FAST);
         }

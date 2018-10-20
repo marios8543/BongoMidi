@@ -39,6 +39,14 @@ class MidiParser {
             this.status = status;
         }
 
+        Note() {
+            this.patch = 0;
+            this.cpatch = Renderer.Instr_Categ.Percussion;
+            this.channel = 9;
+            this.midi_number = 0;
+            this.status = true;
+        }
+
         @Override
         public String toString() {
             return String.format("Note: %d - Channel: %d - Patch: %d (Category: %s) - Status: %s",this.midi_number,this.channel,this.patch,this.cpatch,this.status);

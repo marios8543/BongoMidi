@@ -1,4 +1,5 @@
 package com.bongo;
+
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -6,7 +7,6 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.time.Instant;
-import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import javax.sound.midi.InvalidMidiDataException;
 import javax.sound.midi.MidiUnavailableException;
@@ -97,7 +97,7 @@ class Main{
         int ok = JOptionPane.showOptionDialog(window,
                 "BongoCat MIDI Player\nhttps://github.com/marios8543/BongoMidi\nRestart?",
                 "Thanks for playing!",JOptionPane.YES_NO_OPTION,JOptionPane.PLAIN_MESSAGE,
-                new ImageIcon(Objects.requireNonNull(Renderer.load_asset("bongo.png"))),
+                new FinishAnimation(),
                 null,null);
         if(ok==JOptionPane.YES_OPTION){
             restart();
@@ -297,5 +297,45 @@ class Main{
         parser.sequencer.start();
 
         speedSlider.setValue((int) parser.sequencer.getTempoInBPM());
+    }
+}
+
+class FinishAnimation implements Icon {
+    FinishAnimation() {
+        final Thread renderThread = new Thread(() -> {
+            while (true){
+                try {
+                    Thread.sleep(200);
+                } catch (Exception e) {
+                    JOptionPane.showMessageDialog(Main.window, e.getMessage(), "Rendering thread error", JOptionPane.ERROR_MESSAGE);
+                    break;
+                }
+                if (component != null) component.repaint();
+            }
+        });
+        renderThread.start();
+    }
+
+    public void paintIcon(Component c, Graphics g, int x, int y) {
+        if (FinishAnimation.component == null) FinishAnimation.component = c;
+        g.clearRect(0,0, c.getWidth(), c.getHeight());
+        // TODO: Actually get the bongo image to load/display here
+        // I simply use "Percussion" for now
+        g.drawImage(bongo.note.cpatch.getAsset(), x, y, c);
+        g.drawImage(Renderer.get_lhand(bongo.l_hand), x, y, c);
+        g.drawImage(Renderer.get_rhand(bongo.r_hand), x, y, c);
+        bongo.swap();
+    }
+
+    private Renderer.Bongo bongo = new Renderer.Bongo();
+
+    private static Component component;
+
+    public int getIconWidth() {
+        return 380;
+    }
+
+    public int getIconHeight() {
+        return 264;
     }
 }
