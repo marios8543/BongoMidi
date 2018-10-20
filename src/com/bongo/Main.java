@@ -64,8 +64,13 @@ class Main{
                 JOptionPane.showMessageDialog(window, e.getMessage(), "Rendering thread error", JOptionPane.ERROR_MESSAGE);
                 break;
             }
-            if(Main.parser.sequencer.getMicrosecondPosition()==Main.parser.sequencer.getMicrosecondLength()){
-                if (finishTrigger) Main.finish();
+            if(Main.parser.sequencer.getLoopCount() != Sequencer.LOOP_CONTINUOUSLY) {
+                if (Main.parser.sequencer.getMicrosecondPosition() == Main.parser.sequencer.getMicrosecondLength()) {
+                    if (finishTrigger) Main.finish();
+                }
+            }
+            if (Main.parser.sequencer.getTickPosition() < 0) {
+                Main.parser.sequencer.setTickPosition(0);
             }
             if (!parser.sequencer.isRunning()) continue;
             window.repaint();
