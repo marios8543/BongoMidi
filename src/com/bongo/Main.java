@@ -210,6 +210,7 @@ class Main{
         speedSlider.addChangeListener(e -> {
             JSlider source = (JSlider) e.getSource();
             parser.sequencer.setTempoInBPM((float) source.getValue());
+            speed.setText("Speed: (" + source.getValue() + " BPM)");
         });
         speedSlider.setBackground(Color.WHITE);
 
@@ -279,7 +280,6 @@ class Main{
         buttonPanel.add(Box.createRigidArea(new Dimension(30, 0)));
         buttonPanel.add(speed);
         buttonPanel.add(speedSlider);
-
 
         Canvas c = new Canvas();
         c.setLocation(new Point(0, 0));
