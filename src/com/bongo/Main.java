@@ -2,7 +2,6 @@ package com.bongo;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
@@ -36,12 +35,14 @@ class Canvas extends JComponent {
 class Main{
     static Renderer.Bongo[] bongos = new Renderer.Bongo[16];
     static final JFrame window = new JFrame();
-    private static MidiParser parser;
+    public static MidiParser parser;
     private static File file = null;
     private static JButton pauseButton;
     private static boolean seekselftrigger = false;
     private static boolean finishTrigger = true;
     private static String lenstr;
+    public static float initialBpm;
+    public static JSlider speedSlider;
     private static JSlider seekslider = new JSlider(0,0);
     private static JLabel timeLabel;
 
@@ -96,7 +97,7 @@ class Main{
                 } catch (Exception ex) {
                     Runtime runtime = Runtime.getRuntime();
                     try {
-                        runtime.exec("xdg-open https://github.com/marios8543/BongoMidi");
+                        runtime.exec("xdg-open rhttps://github.com/marios8543/BongoMidi");
                     } catch (IOException ee) {
                         JOptionPane.showMessageDialog(window, ee.getMessage(), "Browser open error", JOptionPane.ERROR_MESSAGE);
                     }
@@ -217,7 +218,7 @@ class Main{
         loop.setBackground(Color.WHITE);
 
         JLabel speed = new JLabel("Speed:");
-        JSlider speedSlider = new JSlider(33, 300);
+        speedSlider = new JSlider(33, 300);
         speedSlider.addChangeListener(e -> {
             JSlider source = (JSlider) e.getSource();
             parser.sequencer.setTempoInBPM((float) source.getValue());
@@ -236,6 +237,9 @@ class Main{
             parser.sequencer.setTempoInBPM(speedSlider.getValue());
         });
         seekslider.setBackground(Color.WHITE);
+
+        JButton resetButton = new JButton("Reset");
+        resetButton.addActionListener(e -> speedSlider.setValue((int)initialBpm));
 
         JButton openButton = new JButton("Open file");
         openButton.addActionListener(e -> {
@@ -271,6 +275,9 @@ class Main{
         buttonPanel.add(Box.createRigidArea(new Dimension(30, 0)));
         buttonPanel.add(speed);
         buttonPanel.add(speedSlider);
+        buttonPanel.add(Box.createRigidArea(new Dimension(10, 0)));
+        buttonPanel.add(resetButton);
+
 
         Canvas c = new Canvas();
         c.setLocation(new Point(0, 0));
@@ -287,7 +294,8 @@ class Main{
         renderThread.start();
         parser.sequencer.start();
 
-        speedSlider.setValue((int) parser.sequencer.getTempoInBPM());
+        initialBpm = parser.sequencer.getTempoInBPM();
+        speedSlider.setValue((int)initialBpm);
     }
 }
 
