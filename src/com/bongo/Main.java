@@ -2,6 +2,7 @@ package com.bongo;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.io.File;
 import java.io.IOException;
@@ -52,10 +53,9 @@ class Main{
         long ms = (long) ((1. / ((double) refreshRate)) * 1000);
         while (true){
             try {
-                Main.timeLabel.setText(String.format("%02d:%02d.%03d/%s",
+                Main.timeLabel.setText(String.format("%02d:%02d/%s",
                         TimeUnit.MICROSECONDS.toMinutes(Main.parser.sequencer.getMicrosecondPosition()),
                         TimeUnit.MICROSECONDS.toSeconds(Main.parser.sequencer.getMicrosecondPosition()) % 60,
-                        Main.parser.sequencer.getMicrosecondPosition() % 1000,
                         Main.lenstr));
                 Main.seekslider.setValue((int)Main.parser.sequencer.getMicrosecondPosition());
                 Main.seekselftrigger=true;
@@ -88,17 +88,29 @@ class Main{
     }
 
     private static void finish() {
+        JButton forkButton = new JButton("Fork me on GitHub!");
+        forkButton.addActionListener(e -> {
+            if (Desktop.isDesktopSupported()) {
+                try {
+                    Desktop.getDesktop().browse(new URI("https://github.com/marios8543/BongoMidi"));
+                } catch (Exception ex) {
+                    Runtime runtime = Runtime.getRuntime();
+                    try {
+                        runtime.exec("xdg-open https://github.com/marios8543/BongoMidi");
+                    } catch (IOException ee) {
+                        JOptionPane.showMessageDialog(window, ee.getMessage(), "Browser open error", JOptionPane.ERROR_MESSAGE);
+                    }
+                }
+            }
+        });
         pauseButton.setText("Restart");
         pauseButton.setActionCommand("restart");
         parser.sequencer.stop();
         bongos = new Renderer.Bongo[16];
         window.repaint();
         finishTrigger = false;
-        int ok = JOptionPane.showOptionDialog(window,
-                "BongoCat MIDI Player\nhttps://github.com/marios8543/BongoMidi\nRestart?",
-                "Thanks for playing!",JOptionPane.YES_NO_OPTION,JOptionPane.PLAIN_MESSAGE,
-                new FinishAnimation(),
-                null,null);
+        Integer ok = JOptionPane.showOptionDialog(window, "BongoCat MIDI Player\nhttps://github.com/marios8543/BongoMidi\n\nRestart?",
+                "Thanks for playing!",JOptionPane.YES_NO_OPTION, JOptionPane.PLAIN_MESSAGE, new FinishAnimation(), new Object[]{"Yes","No",forkButton},null);
         if(ok==JOptionPane.YES_OPTION){
             restart();
         }
@@ -155,10 +167,9 @@ class Main{
         }
         window.setName("Bongo Cat MIDI Player - " + file.getName());
         window.setTitle("Bongo Cat MIDI Player - " + file.getName());
-        lenstr = String.format("%02d:%02d.%03d",
+        lenstr = String.format("%02d:%02d",
                 TimeUnit.MICROSECONDS.toMinutes(private_parser.sequencer.getMicrosecondLength()),
-                TimeUnit.MICROSECONDS.toSeconds(private_parser.sequencer.getMicrosecondLength()) % 60,
-                private_parser.sequencer.getMicrosecondLength() % 1000);
+                TimeUnit.MICROSECONDS.toSeconds(private_parser.sequencer.getMicrosecondLength()) % 60);
         seekslider.setMaximum((int)private_parser.sequencer.getMicrosecondLength());
         return private_parser;
     }
@@ -247,30 +258,10 @@ class Main{
             }
         });
 
-        JButton forkButton = new JButton("Fork me on GitHub!");
-        forkButton.addActionListener(e -> {
-            switch (e.getActionCommand()) {
-                case "fork": {
-                    if (Desktop.isDesktopSupported()) {
-                        try {
-                            Desktop.getDesktop().browse(new URI("https://github.com/marios8543/BongoMidi"));
-                        } catch (Exception ex) {
-                            JOptionPane.showMessageDialog(window, ex.getMessage(), "Error opening GitHub page",
-                                    JOptionPane.ERROR_MESSAGE);
-                        }
-                    }
-                }
-            }
-        });
-        forkButton.setActionCommand("fork");
-
         openButton.setAlignmentX(Component.RIGHT_ALIGNMENT);
-        buttonPanel.add(Box.createRigidArea(new Dimension(5,0)));
         buttonPanel.add(openButton);
         buttonPanel.add(Box.createRigidArea(new Dimension(30, 0)));
         buttonPanel.add(pauseButton);
-        buttonPanel.add(Box.createRigidArea(new Dimension(30, 0)));
-        buttonPanel.add(forkButton);
         buttonPanel.add(Box.createRigidArea(new Dimension(30, 0)));
         buttonPanel.add(loop);
         buttonPanel.add(Box.createRigidArea(new Dimension(30, 0)));
@@ -301,6 +292,9 @@ class Main{
 }
 
 class FinishAnimation implements Icon {
+    private Boolean lhand = true;
+    private Boolean rhand = false;
+
     FinishAnimation() {
         final Thread renderThread = new Thread(() -> {
             while (true){
@@ -319,15 +313,12 @@ class FinishAnimation implements Icon {
     public void paintIcon(Component c, Graphics g, int x, int y) {
         if (FinishAnimation.component == null) FinishAnimation.component = c;
         g.clearRect(0,0, c.getWidth(), c.getHeight());
-        // TODO: Actually get the bongo image to load/display here
-        // I simply use "Percussion" for now
-        g.drawImage(bongo.note.cpatch.getAsset(), x, y, c);
-        g.drawImage(Renderer.get_lhand(bongo.l_hand), x, y, c);
-        g.drawImage(Renderer.get_rhand(bongo.r_hand), x, y, c);
-        bongo.swap();
+        g.drawImage(Renderer.Instr_Categ.Bongo.getAsset(), x, y, c);
+        g.drawImage(Renderer.get_lhand(lhand), x, y, c);
+        g.drawImage(Renderer.get_rhand(rhand), x, y, c);
+        lhand=!lhand;
+        rhand=!rhand;
     }
-
-    private Renderer.Bongo bongo = new Renderer.Bongo();
 
     private static Component component;
 

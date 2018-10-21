@@ -34,21 +34,6 @@ abstract class Renderer {
         Boolean l_hand=false;
         Boolean r_hand=false;
 
-        // only use this with the final animation
-        Bongo() {
-            x = 0;
-            y = 0;
-            lastSecondValue = 0L;
-            note = new Note();
-            l_hand = true;
-        }
-
-        // same goes here
-        void swap() {
-            l_hand = !l_hand;
-            r_hand = !r_hand;
-        }
-
         Bongo(Note note) {
             if(note.status){
                 if(note.cpatch==Instr_Categ.Percussion || note.cpatch==Instr_Categ.CPerc){
@@ -114,7 +99,8 @@ abstract class Renderer {
         Synth_fx(load_asset("keyboard.png")),
         Ethnic(load_asset("ensemble.png")),
         Percussion(load_asset("drums.png")),
-        FX(load_asset("ensemble.png"));
+        FX(load_asset("ensemble.png")),
+        Bongo(load_asset("bongo.png"));
         private final Image asset;
         Instr_Categ(Image s){
             this.asset = s;
