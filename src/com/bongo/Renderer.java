@@ -27,17 +27,17 @@ abstract class Renderer {
     }
 
     public static class Bongo {
-        final Integer x;
-        final Integer y;
-        final Long lastSecondValue;
-        final Note note;
-        Boolean l_hand=false;
-        Boolean r_hand=false;
+        private final int x;
+        private final int y;
+        private final long lastSecondValue;
+        private final Note note;
+        private boolean l_hand=false;
+        private boolean r_hand=false;
 
         Bongo(Note note) {
-            if(note.status){
-                if(note.cpatch==Instr_Categ.Percussion || note.cpatch==Instr_Categ.CPerc){
-                    if(note.midi_number<=36){
+            if(note.getStatus()){
+                if(note.getCpatch()==Instr_Categ.Percussion || note.getCpatch()==Instr_Categ.CPerc){
+                    if(note.getMidi_number()<=36){
                         this.l_hand=true;
                     }
                     else {
@@ -45,7 +45,7 @@ abstract class Renderer {
                     }
                 }
                 else {
-                    if(note.midi_number<60){
+                    if(note.getMidi_number()<60){
                         this.l_hand=true;
                     }
                     else{
@@ -53,23 +53,49 @@ abstract class Renderer {
                     }
                 }
             }
-            if(Main.bongos[note.channel]!=null){
-                this.x = Main.bongos[note.channel].x;
-                this.y = Main.bongos[note.channel].y;
-                this.l_hand = !Main.bongos[note.channel].l_hand;
-                this.r_hand = !Main.bongos[note.channel].r_hand;
+            if(Main.bongos[note.getChannel()]!=null){
+                this.x = Main.bongos[note.getChannel()].x;
+                this.y = Main.bongos[note.getChannel()].y;
+                this.l_hand = !Main.bongos[note.getChannel()].l_hand;
+                this.r_hand = !Main.bongos[note.getChannel()].r_hand;
             }
             else {
-                Integer[] c = coords.get(15-note.channel);
+                Integer[] c = coords.get(15-note.getChannel());
                 this.x = c[0];
                 this.y = c[1];
             }
             this.note = note;
             this.lastSecondValue = TimeUnit.MILLISECONDS.toSeconds(Instant.now().toEpochMilli());
+
+
         }
         @Override
         public String toString(){
             return String.format("X:%d - Y:%d - L:%b R:%b - %s",this.x,this.y,this.l_hand,this.r_hand,this.note.toString());
+        }
+
+        public int getX() {
+            return x;
+        }
+
+        public int getY() {
+            return y;
+        }
+
+        public long getLastSecondValue() {
+            return lastSecondValue;
+        }
+
+        public Note getNote() {
+            return note;
+        }
+
+        public boolean isL_hand() {
+            return l_hand;
+        }
+
+        public boolean isR_hand() {
+            return r_hand;
         }
     }
 

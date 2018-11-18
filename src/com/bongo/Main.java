@@ -20,12 +20,12 @@ class Canvas extends JComponent {
         for(int i=0;i<Main.bongos.length;i++){
             Renderer.Bongo bongo = Main.bongos[i];
             if(bongo!=null){
-                if (TimeUnit.MILLISECONDS.toSeconds(Instant.now().toEpochMilli()) - 1 > bongo.lastSecondValue) {
+                if (TimeUnit.MILLISECONDS.toSeconds(Instant.now().toEpochMilli()) - 1 > bongo.getLastSecondValue()) {
                     Main.bongos[i] = null;
                 } else {
-                    g.drawImage(bongo.note.cpatch.getAsset(), bongo.x, bongo.y, this);
-                    g.drawImage(Renderer.get_lhand(bongo.l_hand), bongo.x, bongo.y, this);
-                    g.drawImage(Renderer.get_rhand(bongo.r_hand), bongo.x, bongo.y, this);
+                    g.drawImage(bongo.getNote().getCpatch().getAsset(), bongo.getX(), bongo.getY(), this);
+                    g.drawImage(Renderer.get_lhand(bongo.isL_hand()), bongo.getX(), bongo.getY(), this);
+                    g.drawImage(Renderer.get_rhand(bongo.isR_hand()), bongo.getX(), bongo.getY(), this);
                 }
             }
         }

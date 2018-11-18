@@ -20,11 +20,11 @@ class MidiParser {
 
     public static class Note {
 
-        final Integer midi_number;
-        final Integer channel;
+        private final Integer midi_number;
+        private final Integer channel;
         private final Integer patch;
-        final Renderer.Instr_Categ cpatch;
-        final Boolean status;
+        private final Renderer.Instr_Categ cpatch;
+        private final Boolean status;
 
         Note(Integer channel, Integer midi_number, Integer instrument, Boolean status){
             this.patch = instrument;
@@ -42,6 +42,28 @@ class MidiParser {
         @Override
         public String toString() {
             return String.format("Note: %d - Channel: %d - Patch: %d (Category: %s) - Status: %s",this.midi_number,this.channel,this.patch,this.cpatch,this.status);
+        }
+
+        public Integer getMidi_number() {
+            return midi_number;
+        }
+
+        public Integer getChannel() {
+            return channel;
+        }
+
+// --Commented out by Inspection START (17/11/2018 5:47 μμ):
+//        public Integer getPatch() {
+//            return patch;
+//        }
+// --Commented out by Inspection STOP (17/11/2018 5:47 μμ)
+
+        public Renderer.Instr_Categ getCpatch() {
+            return cpatch;
+        }
+
+        public Boolean getStatus() {
+            return status;
         }
     }
 
