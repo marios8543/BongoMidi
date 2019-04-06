@@ -1,6 +1,5 @@
 package com.bongo;
 import java.awt.*;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Objects;
 import java.util.concurrent.TimeUnit;
@@ -8,19 +7,21 @@ import javax.imageio.ImageIO;
 import com.bongo.MidiParser.Note;
 
 abstract class Renderer {
-    private static final ArrayList<Integer> xcoords = new ArrayList<>();
-    private static final ArrayList<Integer> ycoords = new ArrayList<>();
-    private static final ArrayList<Integer[]> coords = new ArrayList<>();
+    private static ArrayList<Integer[]> coords = new ArrayList<>();
 
-    static void build_coords(){
-        for(int i=0;i<1024;i+=301){
+    static void build_coords(int width,int height){
+        System.out.println(width);
+        System.out.println(height);
+        ArrayList<Integer> xcoords = new ArrayList<>();
+        ArrayList<Integer> ycoords = new ArrayList<>();
+        for(int i=0;i<width;i+=380){
             xcoords.add(i);
         }
-        for(int i=0;i<720;i+=185){
+        for(int i=0;i<height;i+=264){
             ycoords.add(i);
         }
         for(int a : xcoords){
-            for(int b :ycoords){
+            for(int b : ycoords){
                 coords.add(new Integer[]{a,b});
             }
         }
@@ -65,7 +66,7 @@ abstract class Renderer {
                 this.y = c[1];
             }
             this.note = note;
-            this.lastSecondValue = TimeUnit.MILLISECONDS.toSeconds(Instant.now().toEpochMilli());
+            this.lastSecondValue = TimeUnit.MILLISECONDS.toSeconds(System.currentTimeMillis());
 
 
         }

@@ -52,11 +52,10 @@ class MidiParser {
             return channel;
         }
 
-// --Commented out by Inspection START (17/11/2018 5:47 μμ):
-//        public Integer getPatch() {
-//            return patch;
-//        }
-// --Commented out by Inspection STOP (17/11/2018 5:47 μμ)
+        public Integer getPatch() {
+            return patch;
+        }
+
 
         public Renderer.Instr_Categ getCpatch() {
             return cpatch;
